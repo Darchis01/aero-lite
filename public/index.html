@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AERO — Autonomous Edge-Resilience Orchestrator</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <h1>AERO</h1>
+      <span class="brand-sub">Autonomous Edge-Resilience Orchestrator</span>
+    </div>
+    <div class="topbar-right">
+      <span id="uptime" class="uptime">00:00:00</span>
+      <label class="toggle">
+        <input type="checkbox" id="failoverToggle" checked>
+        <span>Predictive Failover</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel network-panel">
+      <div class="panel-header">
+        <h2>Network Topology</h2>
+        <div class="legend">
+          <span class="legend-item"><i class="dot up"></i> Stable</span>
+          <span class="legend-item"><i class="dot degraded"></i> Predicted Risk</span>
+          <span class="legend-item"><i class="dot failed"></i> Failed</span>
+        </div>
+      </div>
+      <div id="network"></div>
+      <div class="controls">
+        <select id="linkSelect"></select>
+        <button id="injectBtn" class="btn btn-danger">Inject Failure</button>
+        <button id="restoreBtn" class="btn">Restore All</button>
+        <button id="resetBtn" class="btn btn-ghost">Reset Simulation</button>
+      </div>
+    </section>
+
+    <section class="panel stats-panel">
+      <h2>Live Stats</h2>
+      <div id="stats" class="stats-grid"></div>
+
+      <h2>Predicted vs. Reactive Failover</h2>
+      <div id="comparison" class="comparison-grid"></div>
+
+      <h2>Prediction Log</h2>
+      <div id="predictions" class="predictions-log"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    AERO-Lite — synthetic demo mode. ML inference (Random Forest, 150 trees) runs for real
+    on generated traffic data. See the README for how this differs from the full
+    Mininet/Ryu simulation.
+  </footer>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

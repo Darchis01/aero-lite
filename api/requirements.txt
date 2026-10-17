@@ -1,0 +1,11 @@
+# Intentionally empty.
+#
+# The serverless function (api/simulate.py) uses only the Python standard
+# library: http.server, json, os, math, random. The Random Forest model is
+# evaluated by api/forest_predict.py, which walks the tree structure exported
+# to api/forest.json rather than loading scikit-learn/numpy at runtime.
+#
+# This keeps the function's cold start fast and avoids Vercel build issues
+# from heavy ML dependencies. scikit-learn is only needed offline, to train
+# the model and export forest.json -- see training/train_model.py and
+# training/requirements.txt.

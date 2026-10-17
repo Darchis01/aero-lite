@@ -5,16 +5,23 @@ POST /api/simulate
   body: {"tick": int, "injectedFailures": ["s3-s4", ...], "predictiveFailoverEnabled": true}
   -> full topology + per-link metrics + ML predictions + stats for that tick
 
-Vercel's Python runtime (@vercel/python) natively supports a BaseHTTPRequestHandler
-subclass named `handler` in any file under /api -- no Flask or other framework
-needed, which keeps this function's cold start fast and its dependency list
-(stdlib only) at zero.
+Helper modules live in api/_lib/ (underscore-prefixed folders are not turned
+into separate serverless functions by Vercel). Only this file is an endpoint.
 """
 import json
+import os
+import sys
+import traceback
 from http.server import BaseHTTPRequestHandler
 
-from forest_predict import predict as rf_predict
-from simulator import build_state
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "_lib"))
+
+IMPORT_ERROR = None
+try:
+    from forest_predict import predict as rf_predict
+    from simulator import build_state
+except Exception:  # surfaced as JSON instead of an opaque 500
+    IMPORT_ERROR = traceback.format_exc()
 
 
 class handler(BaseHTTPRequestHandler):
@@ -30,13 +37,11 @@ class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
     def do_GET(self):
-        # Convenience: a plain GET returns tick=0 with no injected failures,
-        # useful for a first paint before the frontend starts polling.
         self._handle({"tick": 0, "injectedFailures": [], "predictiveFailoverEnabled": True})
 
     def do_POST(self):
@@ -49,12 +54,14 @@ class handler(BaseHTTPRequestHandler):
         self._handle(body)
 
     def _handle(self, body):
+        if IMPORT_ERROR:
+            self._send_json({"error": "import failed", "detail": IMPORT_ERROR}, status=500)
+            return
         try:
             tick = int(body.get("tick", 0))
             injected = set(body.get("injectedFailures", []) or [])
             failover_enabled = bool(body.get("predictiveFailoverEnabled", True))
-
             state = build_state(tick, injected, failover_enabled, rf_predict)
             self._send_json(state)
-        except Exception as exc:
-            self._send_json({"error": str(exc)}, status=500)
+        except Exception:
+            self._send_json({"error": "simulation failed", "detail": traceback.format_exc()}, status=500)

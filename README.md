@@ -25,7 +25,7 @@ The prediction step is not faked. `training/train_model.py` trains a real
 original project used (8,000 samples with correlated features and a soft
 probabilistic failure boundary, instead of 1,200 independent-random samples
 with a hard OR-threshold label — see the file for details). The trained
-forest is then exported to `api/forest.json` and evaluated with a small
+forest is then exported to `api/_lib/forest.json` and evaluated with a small
 pure-Python tree-walker (`api/forest_predict.py`) instead of loading
 scikit-learn at runtime. This was verified to produce **identical
 predictions to the original sklearn model** across thousands of test
@@ -39,7 +39,7 @@ aero-demo/
 │   ├── simulate.py       Stateless serverless endpoint (POST /api/simulate)
 │   ├── simulator.py      Synthetic topology + per-link traffic generation
 │   ├── forest_predict.py Pure-Python Random Forest inference
-│   ├── forest.json       Exported trained model (tree structure as data)
+│   ├── _lib/forest.json  Exported trained model (tree structure as data)
 │   └── requirements.txt  Intentionally empty — stdlib only
 ├── public/
 │   ├── index.html        Dashboard shell
@@ -90,7 +90,7 @@ This prints cross-validated accuracy, a classification report, and feature
 importances, then saves `model.pkl`. To update the deployed version, re-run
 the export step (see the inline comments in `train_model.py` for the
 tree-export snippet, or ask for it to be regenerated) to refresh
-`api/forest.json`, then redeploy.
+`api/_lib/forest.json`, then redeploy.
 
 ## License
 

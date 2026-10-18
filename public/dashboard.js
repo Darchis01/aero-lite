@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const link = document.getElementById('linkSelect').value;
     if (link) injectedFailures.add(link);
   });
+  document.getElementById('restoreOneBtn').addEventListener('click', () => {
+    const link = document.getElementById('linkSelect').value;
+    if (link) injectedFailures.delete(link);
+  });
   document.getElementById('restoreBtn').addEventListener('click', () => {
     injectedFailures.clear();
   });
@@ -100,7 +104,10 @@ function renderNetwork(nodes, edges) {
 function renderLinkSelect(edges) {
   const select = document.getElementById('linkSelect');
   const current = select.value;
-  select.innerHTML = edges.map(e => `<option value="${e.label}">${e.label}</option>`).join('');
+  select.innerHTML = edges.map(e => {
+    const failed = injectedFailures.has(e.label) ? ' (failed)' : '';
+    return `<option value="${e.label}">${e.label}${failed}</option>`;
+  }).join('');
   if (current) select.value = current;
 }
 
